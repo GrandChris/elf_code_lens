@@ -1,8 +1,10 @@
 {
-	"name": "elf-code-lens",
-	"displayName": "elf_code_lens",
+	"name": "elf-lens",
+	"displayName": "Elf Lens",
 	"description": "Reads a compiled \".elf\" (\"Executable and Linkable Format\") file with \"Dwarf\" debug information shows some info in your source code. ",
 	"version": "0.0.1",
+	"publisher": "GrandChris",
+	"repository": "https://github.com/GrandChris/elf_code_lens",
 	"engines": {
 		"vscode": "^1.54.0"
 	},
@@ -10,16 +12,53 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:elf-code-lens.helloWorld"
+		"onCommand:elf-lens.Disassemble",
+		"onCommand:elf-lens.ShowLine"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "elf-code-lens.helloWorld",
-				"title": "Hello World"
+				"title": "Enable CodeLens",
+				"command": "codelens-sample.enableCodeLens",
+				"category": "CodeLens Sample"
+			},
+			{
+				"title": "Disable Codelens",
+				"command": "codelens-sample.disableCodeLens",
+				"category": "CodeLens Sample"
+			},
+			{
+				"title": "Disassemble",
+				"command": "elf-lens.Disassemble",
+				"category": "Elf Lens"
+			},
+			{
+				"title": "Show Line",
+				"command": "elf-lens.ShowLine",
+				"category": "Elf Lens"
 			}
-		]
+		],
+		"configuration": {
+			"title": "Elf Lens",
+			"properties": {
+				"elf-lens.filePath": {
+					"type": "string",
+					"default": "build/app.elf",
+					"description": "Specifies the file path to an elf file (Executable and Linkable Format)"
+				},
+				"elf-lens.showOutputWindow": {
+					"type": "boolean",
+					"default": "true",
+					"description": "Shows the output window when executing an 'Elf Lens' command"
+				},
+				"elf-lens.outputDetails": {
+					"type": "boolean",
+					"default": "true",
+					"description": "Shows additional info in the output window"
+				}
+			}
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
@@ -33,19 +72,26 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.54.0",
 		"@types/glob": "^7.1.3",
 		"@types/mocha": "^8.0.4",
 		"@types/node": "^12.11.7",
-		"eslint": "^7.19.0",
+		"@types/text-encoding": "0.0.35",
+		"@types/vscode": "^1.54.0",
 		"@typescript-eslint/eslint-plugin": "^4.14.1",
 		"@typescript-eslint/parser": "^4.14.1",
+		"copy-webpack-plugin": "^8.1.0",
+		"eslint": "^7.19.0",
 		"glob": "^7.1.6",
 		"mocha": "^8.2.1",
+		"raw-loader": "^4.0.2",
+		"ts-loader": "^8.0.14",
 		"typescript": "^4.1.3",
 		"vscode-test": "^1.5.0",
-		"ts-loader": "^8.0.14",
 		"webpack": "^5.19.0",
 		"webpack-cli": "^4.4.0"
+	},
+	"dependencies": {
+		"text-encoding": "^0.7.0",
+		"ts-stopwatch": "0.0.4"
 	}
 }
