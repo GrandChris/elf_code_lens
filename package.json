@@ -2,7 +2,7 @@
 	"name": "elf-lens",
 	"displayName": "Elf Lens",
 	"description": "Reads a compiled \".elf\" (\"Executable and Linkable Format\") file with \"Dwarf\" debug information shows some info in your source code. ",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"publisher": "GrandChris",
 	"repository": "https://github.com/GrandChris/elf_code_lens",
 	"engines": {
