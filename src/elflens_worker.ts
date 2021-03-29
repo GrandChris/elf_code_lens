@@ -2,6 +2,7 @@
 import { MessageChannel, Worker, workerData, parentPort } from 'worker_threads';
 import * as encoding from 'text-encoding';
 import { MessagePort } from 'node:worker_threads';
+var path = require('path')
 
 console.log("Hello world from elflens_worker.ts");
 
@@ -121,7 +122,7 @@ class ElfLensWorker {
         const content : Uint8Array = params.content;
         const fileName : string = params.fileName;
 
-        this.disassembledFile = await this.parseElfFile(content);
+        this.disassembledFile = await this.parseElfFile(params);
         this.sortPerFileName();
 
         const fileContent = await this.toString(this.disassembledFile);
@@ -202,7 +203,12 @@ class ElfLensWorker {
      * @author   GrandChris
      * @date     2021-03-18
      */
-    private async parseElfFile(data: Uint8Array) {
+    private async parseElfFile(params: any) {
+        const data : Uint8Array = params.content;
+        const fileName : string = params.fileName;
+
+        const abs_path = path.dirname(fileName);
+
         if(this.elf_analysis == null) {
             this.elf_analysis = await this.create_elf_analysis();
         }
@@ -226,9 +232,25 @@ class ElfLensWorker {
         var lines_size = 0;
         for (var i = 0; i < size; i++) {
             
+            var line_path = elf_analysis.get_line_path(i);
+            if(line_path != "") {
+                if(!path.isAbsolute(line_path)) {
+                    line_path = abs_path + "/" + line_path;
+                }
+                line_path = path.normalize(line_path).replace(/\\/g, '/');
+            }
+
+            var branch_path = elf_analysis.get_line_path(i);
+            if(branch_path != "") {
+                if(!path.isAbsolute(branch_path)) {
+                    branch_path = abs_path + "/" + branch_path;
+                }
+                branch_path = path.normalize(branch_path).replace(/\\/g, '/');
+            }
+
             const line : Line = {
                 filename : elf_analysis.get_line_filename(i),
-                path: elf_analysis.get_line_path(i).replace(/\\/g, '/'),
+                path: line_path,
                 line: elf_analysis.get_line_line(i),
                 column: elf_analysis.get_line_column(i),
                 isStartSequence : Boolean(elf_analysis.get_line_isStartSequence(i))
@@ -236,7 +258,7 @@ class ElfLensWorker {
 
             const line_Branch : Line = {
                 filename : elf_analysis.get_branch_destination_line_filename(i),
-                path: elf_analysis.get_branch_destination_line_path(i),
+                path: branch_path,
                 line: elf_analysis.get_branch_destination_line_line(i),
                 column: elf_analysis.get_branch_destination_line_column(i),
                 isStartSequence : Boolean(elf_analysis.get_branch_destination_line_isStartSequence(i))
@@ -294,8 +316,8 @@ class ElfLensWorker {
         else {
             line += ("0x" + disassembledFile.lines[i].address.toString(16) + " " + disassembledFile.lines[i].opcode_description + " ").padEnd(35, ' ');
             if(disassembledFile.lines[i].line.filename != "") {
-                line += (disassembledFile.lines[i].line.filename + ":" + disassembledFile.lines[i].line.line + ":" + disassembledFile.lines[i].line.column + " ").padEnd(30, ' ');
-                // line += (disassembledFile.lines[i].line.path + "/" + disassembledFile.lines[i].line.filename + ":" + disassembledFile.lines[i].line.line + ":" + disassembledFile.lines[i].line.column + " ").padEnd(40, ' ');
+                // line += (disassembledFile.lines[i].line.filename + ":" + disassembledFile.lines[i].line.line + ":" + disassembledFile.lines[i].line.column + " ").padEnd(30, ' ');
+                line += (disassembledFile.lines[i].line.path + "/" + disassembledFile.lines[i].line.filename + ":" + disassembledFile.lines[i].line.line + ":" + disassembledFile.lines[i].line.column + " ").padEnd(40, ' ');
             }
             if(disassembledFile.lines[i].branch_destination_line.filename.length != 0) {
                 line += "0x" + disassembledFile.lines[i].branch_destination.toString(16) + " ";
